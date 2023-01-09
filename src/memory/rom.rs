@@ -1,13 +1,13 @@
 use super::*;
 
 pub struct ROM {
-    rom: Box<Vec<u8>>,
+    rom: Vec<u8>,
 }
 
 impl ROM {
     pub fn new(data: Vec<u8>) -> ROM {
         ROM {
-            rom: Box::new(data),
+            rom: data,
         }
     }
 }

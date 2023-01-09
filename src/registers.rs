@@ -63,7 +63,7 @@ impl Registers {
     }
 
     pub fn get_status_register(&self) -> u8 {
-        self.status_register | 0x30 // auto set bits 5 & 6.
+        self.status_register | 0b0011_0000 // auto set bits 4 & 5.
     }
 
     pub fn set_status_register(&mut self, status: u8) {
