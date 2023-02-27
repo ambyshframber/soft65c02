@@ -1,3 +1,5 @@
+//! Memory operations and interfaces.
+
 use std::fmt;
 
 mod error;
@@ -14,6 +16,7 @@ pub use rom::ROM;
 
 pub const MEMMAX: usize = 65535;
 
+/// Convert a little-endian vector of bytes into a usize.
 pub fn little_endian(bytes: Vec<u8>) -> usize {
     let mut addr: usize = 0;
 
@@ -24,10 +27,7 @@ pub fn little_endian(bytes: Vec<u8>) -> usize {
     addr
 }
 
-/*
- * AddressableIO
- * this trait defines the interface for all memory systems
- */
+/// This trait defines the interface for all memory systems
 pub trait AddressableIO {
     fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError>;
     fn write(&mut self, location: usize, data: &Vec<u8>) -> Result<(), MemoryError>;

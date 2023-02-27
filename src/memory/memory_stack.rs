@@ -61,6 +61,9 @@ impl fmt::Debug for Subsystem {
     }
 }
 
+/// The processor-visible memory map.
+/// 
+/// This contains all memory-mapped systems and on a real computer would be mostly address decoding hardware.
 #[derive(Debug)]
 pub struct MemoryStack {
     stack: Vec<Subsystem>,

@@ -1,28 +1,26 @@
+//! 65C02 registers
+//! accumulator, X & Y registers are 8 bits general purpose registers.
+//! status flags register :
+//!   bit 7: Negative flag
+//!   bit 6: oVerflow flag
+//!   bit 5: not used             (open circuit, always 1)
+//!   bit 4: Break interrupt mode (open circuit, always 1)
+//!   bit 3: Decimal mode
+//!   bit 2: Interrupt disable
+//!   bit 1: Zero flag
+//!   bit 0: Carry flag
+//! command pointer: 16 bit address register
+//! stack pointer: 8 bits at page 0x0100, set at 0xff at start.
+//! The way the BREAK bit works is a bit puzzling but a quick read at
+//! http://forum.6502.org/viewtopic.php?f=8&t=3111 explains this bit is only
+//! aimed at being saved in the stack to determine if it is a hard or soft
+//! interrupt in the interrupt service routine (see
+//! http://6502.org/tutorials/interrupts.html).
+
 use super::memory::MemoryStack as Memory;
 use super::memory::{AddressableIO, MemoryError};
 use std::fmt;
 use rand::random;
-/*
- * 65C02 registers
- * accumulator, X & Y registers are 8 bits general purpose registers.
- * status flags register :
- *   bit 7: Negative flag
- *   bit 6: oVerflow flag
- *   bit 5: not used             (open circuit, always 1)
- *   bit 4: Break interrupt mode (open circuit, always 1)
- *   bit 3: Decimal mode
- *   bit 2: Interrupt disable
- *   bit 1: Zero flag
- *   bit 0: Carry flag
- *
- * command pointer: 16 bit address register
- * stack pointer: 8 bits at page 0x0100, set at 0xff at start.
- * The way the BREAK bit works is a bit puzzling but a quick read at
- * http://forum.6502.org/viewtopic.php?f=8&t=3111 explains this bit is only
- * aimed at being saved in the stack to determine if it is a hard or soft
- * interrupt in the interrupt service routine (see
- * http://6502.org/tutorials/interrupts.html).
- */
 pub const STACK_BASE_ADDR: usize = 0x0100;
 
 pub struct Registers {
@@ -32,6 +30,25 @@ pub struct Registers {
     status_register: u8,
     pub command_pointer: usize,
     pub stack_pointer: u8,
+}
+
+const N_SHIFT: u8 = 7;
+const V_SHIFT: u8 = 6;
+const D_SHIFT: u8 = 3;
+const I_SHIFT: u8 = 2;
+const Z_SHIFT: u8 = 1;
+const C_SHIFT: u8 = 0;
+
+macro_rules! flag_fns {
+    ($get_name:ident, $set_name:ident, $shift:expr) => {
+        pub fn $get_name(&self) -> bool {
+            self.status_register & (1 << $shift) != 0
+        }
+        pub fn $set_name(&mut self, flag: bool) {
+            self.status_register &= !(1 << $shift);
+            self.status_register |= (flag as u8) << $shift;
+        }
+    };
 }
 
 impl Registers {
@@ -88,77 +105,12 @@ impl Registers {
         Ok(memory.read(STACK_BASE_ADDR + self.stack_pointer as usize, 1)?[0])
     }
 
-    pub fn n_flag_is_set(&self) -> bool {
-        self.status_register & 0b10000000 == 0b10000000
-    }
-
-    pub fn v_flag_is_set(&self) -> bool {
-        self.status_register & 0b01000000 == 0b01000000
-    }
-
-    pub fn d_flag_is_set(&self) -> bool {
-        self.status_register & 0b00001000 == 0b00001000
-    }
-
-    pub fn i_flag_is_set(&self) -> bool {
-        self.status_register & 0b00000100 == 0b00000100
-    }
-
-    pub fn z_flag_is_set(&self) -> bool {
-        self.status_register & 0b00000010 == 0b00000010
-    }
-
-    pub fn c_flag_is_set(&self) -> bool {
-        self.status_register & 0b00000001 == 0b00000001
-    }
-
-    pub fn set_n_flag(&mut self, flag: bool) {
-        if flag {
-            self.status_register |= 0b10000000;
-        } else {
-            self.status_register &= 0b01111111;
-        }
-    }
-
-    pub fn set_v_flag(&mut self, flag: bool) {
-        if flag {
-            self.status_register |= 0b01000000;
-        } else {
-            self.status_register &= 0b10111111;
-        }
-    }
-
-    pub fn set_d_flag(&mut self, flag: bool) {
-        if flag {
-            self.status_register |= 0b00001000;
-        } else {
-            self.status_register &= 0b11110111;
-        }
-    }
-
-    pub fn set_i_flag(&mut self, flag: bool) {
-        if flag {
-            self.status_register |= 0b00000100;
-        } else {
-            self.status_register &= 0b11111011;
-        }
-    }
-
-    pub fn set_z_flag(&mut self, flag: bool) {
-        if flag {
-            self.status_register |= 0b00000010;
-        } else {
-            self.status_register &= 0b11111101;
-        }
-    }
-
-    pub fn set_c_flag(&mut self, flag: bool) {
-        if flag {
-            self.status_register |= 0b00000001;
-        } else {
-            self.status_register &= 0b11111110;
-        }
-    }
+    flag_fns!(n_flag_is_set, set_n_flag, N_SHIFT);
+    flag_fns!(v_flag_is_set, set_v_flag, V_SHIFT);
+    flag_fns!(d_flag_is_set, set_d_flag, D_SHIFT);
+    flag_fns!(i_flag_is_set, set_i_flag, I_SHIFT);
+    flag_fns!(z_flag_is_set, set_z_flag, Z_SHIFT);
+    flag_fns!(c_flag_is_set, set_c_flag, C_SHIFT);
 
     pub fn format_status(&self) -> String {
         format!(

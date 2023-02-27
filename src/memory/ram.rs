@@ -1,5 +1,6 @@
 use super::*;
 
+/// Basic RAM.
 pub struct RAM {
     ram: Box<[u8; MEMMAX + 1]>,
 }

@@ -1,5 +1,6 @@
 use super::*;
 
+/// Read-only memory.
 pub struct ROM {
     rom: Vec<u8>,
 }

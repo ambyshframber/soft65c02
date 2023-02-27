@@ -1,15 +1,14 @@
-/*
- * Soft65C02 Mini Framebuffer
- *
- * The framebuffer memory subsystem is composed as following:
- * #0x0000 → #0x002F    palette (16 × 3 bytes for RGB)
- * #0x0030 → #0x003F    keyboard keys pressed
- * #0x0040 → #0x00FF    unused¹
- * #0x0100 → #0x1900    video buffer
- *
- * ¹ Technically this is still RAM so it can be used to just store data. Be aware that it will
- * trigger token inspection on write hence might be less performant than a RAM memory subsystem.
- */
+//! Soft65C02 Mini Framebuffer
+//!
+//! The framebuffer memory subsystem is composed as following:
+//! #0x0000 → #0x002F    palette (16 × 3 bytes for RGB)
+//! #0x0030 → #0x003F    keyboard keys pressed
+//! #0x0040 → #0x00FF    unused¹
+//! #0x0100 → #0x1900    video buffer
+//!
+//! ¹ Technically this is still RAM so it can be used to just store data. Be aware that it will
+//! trigger token inspection on write hence might be less performant than a RAM memory subsystem.
+
 use super::*;
 use minifb::{InputCallback, Window, Scale, ScaleMode, WindowOptions, Key, KeyRepeat};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
