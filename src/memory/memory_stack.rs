@@ -39,7 +39,7 @@ impl AddressableIO for Subsystem {
         self.subsystem.read(addr, len)
     }
 
-    fn write(&mut self, location: usize, data: &Vec<u8>) -> Result<(), MemoryError> {
+    fn write(&mut self, location: usize, data: &[u8]) -> Result<(), MemoryError> {
         self.subsystem.write(location, data)
     }
 
@@ -67,7 +67,7 @@ impl fmt::Debug for Subsystem {
 #[derive(Debug)]
 pub struct MemoryStack {
     stack: Vec<Subsystem>,
-    address_map: BTreeMap<usize, usize>,
+    address_map: BTreeMap<usize, usize>, // maps end addresses to subsystems
 }
 
 impl MemoryStack {
@@ -96,7 +96,7 @@ impl MemoryStack {
     ) {
         let end_address = start_address + memory.get_size();
         let sub = Subsystem::new(name, start_address, memory);
-        let mut address_map:BTreeMap<usize, usize> = BTreeMap::new();
+        let mut address_map: BTreeMap<usize, usize> = BTreeMap::new();
         address_map.insert(end_address, self.stack.len());
         let mut keys:Vec<usize> = vec![];
             self.address_map.keys()
@@ -133,7 +133,7 @@ impl MemoryStack {
 
 impl AddressableIO for MemoryStack {
     fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
-        let mut results:Vec<u8> = vec![];
+        let mut results:Vec<u8> = Vec::with_capacity(len);
         let mut tmplen = len;
         let mut tmpaddr = addr;
         for (&addr_split, &sub_index) in &self.address_map {
@@ -160,22 +160,21 @@ impl AddressableIO for MemoryStack {
         Ok(results)
     }
 
-    fn write(&mut self, addr: usize, data: &Vec<u8>) -> Result<(), MemoryError> {
+    fn write(&mut self, addr: usize, mut data: &[u8]) -> Result<(), MemoryError> {
         let len = data.len();
-        let mut data = data.clone();
         let mut tmplen = len;
         let mut tmpaddr = addr;
         for (&addr_split, &sub_index) in &self.address_map {
-            if addr_split > tmpaddr {
+            if addr_split > tmpaddr { // iterate until you reach the right peripheral
                 let sublen = cmp::min(addr_split - tmpaddr, tmplen);
-                let data_left = data.split_off(sublen);
+                let (data_to_write, data_left) = data.split_at(sublen);
                 let substart = self.stack[sub_index].address_range.start;
-                self.stack[sub_index].write(tmpaddr - substart, &data)?;
+                self.stack[sub_index].write(tmpaddr - substart, data_to_write)?;
                 data = data_left;
                 tmplen -= sublen;
                 tmpaddr += sublen;
             }
-            if addr_split >= addr + len {
+            if addr_split >= addr + len { // break off once you're fully out of the peripheral
                 break;
             }
         }
@@ -216,7 +215,7 @@ mod tests {
             }
         }
 
-        fn write(&mut self, addr: usize, data: &Vec<u8>) -> Result<(), MemoryError> {
+        fn write(&mut self, addr: usize, data: &[u8]) -> Result<(), MemoryError> {
             if addr + data.len() > self.size {
                 Err(MemoryError::WriteOverflow(data.len(), addr))
             } else {

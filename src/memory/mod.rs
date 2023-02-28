@@ -30,7 +30,7 @@ pub fn little_endian(bytes: Vec<u8>) -> usize {
 /// This trait defines the interface for all memory systems
 pub trait AddressableIO {
     fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError>;
-    fn write(&mut self, location: usize, data: &Vec<u8>) -> Result<(), MemoryError>;
+    fn write(&mut self, location: usize, data: &[u8]) -> Result<(), MemoryError>;
     fn get_size(&self) -> usize;
 }
 
@@ -44,7 +44,7 @@ pub trait DebugIO: AddressableIO {
         let end = self.get_size();
         let bytes = self.read(0, end).unwrap();
 
-        while address < end {
+        while address < end { // format as hexdump
             if address % 16 == 0 {
                 write!(f, "{}", line).unwrap();
                 line = format!("#{:04X}: ", address);

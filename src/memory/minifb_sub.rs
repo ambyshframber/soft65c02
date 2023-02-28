@@ -249,7 +249,7 @@ impl AddressableIO for MiniFBMemory {
         }
     }
 
-    fn write(&mut self, addr: usize, data: &Vec<u8>) -> Result<(), MemoryError> {
+    fn write(&mut self, addr: usize, data: &[u8]) -> Result<(), MemoryError> {
         let mut buffer = self.buffer.lock().unwrap();
         for (offset, byte) in data.iter().enumerate() {
             buffer[addr + offset] = *byte;

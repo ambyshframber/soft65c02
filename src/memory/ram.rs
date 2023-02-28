@@ -22,7 +22,7 @@ impl AddressableIO for RAM {
         }
     }
 
-    fn write(&mut self, location: usize, data: &Vec<u8>) -> Result<(), MemoryError> {
+    fn write(&mut self, location: usize, data: &[u8]) -> Result<(), MemoryError> {
         if location + data.len() > self.ram.len() {
             Err(MemoryError::WriteOverflow(
                 data.len(), location
