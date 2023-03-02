@@ -35,8 +35,8 @@ impl Subsystem {
 }
 
 impl AddressableIO for Subsystem {
-    fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
-        self.subsystem.read(addr, len)
+    fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
+        self.subsystem.read_n(addr, len)
     }
 
     fn write(&mut self, location: usize, data: &[u8]) -> Result<(), MemoryError> {
@@ -132,7 +132,7 @@ impl MemoryStack {
 }
 
 impl AddressableIO for MemoryStack {
-    fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
+    fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
         let mut results:Vec<u8> = Vec::with_capacity(len);
         let mut tmplen = len;
         let mut tmpaddr = addr;
@@ -143,7 +143,7 @@ impl AddressableIO for MemoryStack {
                 if substart > tmpaddr {
                     return Err(MemoryError::Other(tmpaddr, "reading unallocated memory"));
                 }
-                let mut subr = self.stack[sub_index].read(tmpaddr - substart, sublen)?;
+                let mut subr = self.stack[sub_index].read_n(tmpaddr - substart, sublen)?;
                 results.append(&mut subr);
                 tmplen -= sublen;
                 tmpaddr += sublen;
@@ -185,6 +185,14 @@ impl AddressableIO for MemoryStack {
     fn get_size(&self) -> usize {
         MEMMAX
     }
+
+    fn update(&mut self) -> bool {
+        let mut interrupt = false;
+        for d in &mut self.stack {
+            if d.update() { interrupt = true }
+        }
+        interrupt
+    }
 }
 
 #[cfg(test)]
@@ -207,7 +215,7 @@ mod tests {
             self.size
         }
 
-        fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
+        fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
             if addr + len > self.size {
                 Err(MemoryError::ReadOverflow(len, addr))
             } else {
@@ -251,20 +259,20 @@ mod tests {
     fn test_read_one_subsystem() {
         let memory_stack = init_memory();
         let expected: Vec<u8> = vec![0x00, 0x00, 0x00, 0x00];
-        assert_eq!(expected, memory_stack.read(0xAFFE, 4).unwrap());
+        assert_eq!(expected, memory_stack.read_n(0xAFFE, 4).unwrap());
         let expected: Vec<u8> = vec![0xae, 0xae, 0xae, 0xae];
-        assert_eq!(expected, memory_stack.read(0xDFFE, 4).unwrap());
+        assert_eq!(expected, memory_stack.read_n(0xDFFE, 4).unwrap());
     }
 
     #[test]
     fn test_read_overlaping_subsystems() {
         let memory_stack = init_memory();
         let expected: Vec<u8> = vec![0x00, 0x00, 0xae, 0xae];
-        assert_eq!(expected, memory_stack.read(0xBFFE, 4).unwrap());
+        assert_eq!(expected, memory_stack.read_n(0xBFFE, 4).unwrap());
         let expected: Vec<u8> = vec![0xae, 0xae];
-        assert_eq!(expected, memory_stack.read(0xC000, 2).unwrap());
+        assert_eq!(expected, memory_stack.read_n(0xC000, 2).unwrap());
         let expected: Vec<u8> = vec![0x00, 0x00];
-        assert_eq!(expected, memory_stack.read(0xBFFE, 2).unwrap());
+        assert_eq!(expected, memory_stack.read_n(0xBFFE, 2).unwrap());
     }
 
     #[test]
@@ -274,7 +282,7 @@ mod tests {
         memory_stack.write(0x1000, &data).unwrap();
         assert_eq!(
             vec![0xff, 0xae, 0x81],
-            memory_stack.read(0x1000, 3).unwrap()
+            memory_stack.read_n(0x1000, 3).unwrap()
         );
     }
 
@@ -285,7 +293,7 @@ mod tests {
         match memory_stack.write(0xBFFE, &data) {
             Err(MemoryError::Other(addr, msg)) => {
                 assert_eq!(0x0000, addr);
-                assert_eq!("trying to write in a read-only memory".to_owned(), msg);
+                assert_eq!("trying to write in a read-only memory", msg);
             }
             v => panic!("it should return the expected error, got {:?}", v),
         };
@@ -296,7 +304,7 @@ mod tests {
         let mut memory_stack = MemoryStack::new();
         memory_stack.add_subsystem("RAM", 0x0000, RAM::new());
         memory_stack.add_subsystem("DUMMY", 0x8000, FakeMemory::new(1024, 0));
-        let _ = memory_stack.read(0x7F00, 2048).unwrap();
+        let _ = memory_stack.read_n(0x7F00, 2048).unwrap();
         let data:Vec<u8> = vec![0xff; 2048];
         memory_stack.write(0x7F00, &data).unwrap();
     }
@@ -307,7 +315,7 @@ mod tests {
         let mut memory_stack = MemoryStack::new();
         memory_stack.add_subsystem("DUMMY", 0x0000, FakeMemory::new(0x1000, 0));
         memory_stack.add_subsystem("DUMMY", 0x2000, FakeMemory::new(0x1000, 1));
-        match memory_stack.read(0x0000, 9*1024) {
+        match memory_stack.read_n(0x0000, 9*1024) {
             Err(MemoryError::Other(addr, msg)) => {
                 assert_eq!(0x0000, addr);
                 assert_eq!("trying to write in a read-only memory".to_owned(), msg);
@@ -320,7 +328,7 @@ mod tests {
     fn read_over_memory() {
         let mut memory_stack = MemoryStack::new();
         memory_stack.add_subsystem("DUMMY", 0x0000, FakeMemory::new(0x1000, 0));
-        match memory_stack.read(0, 0x2000) {
+        match memory_stack.read_n(0, 0x2000) {
             Err(MemoryError::ReadOverflow(len, addr_start)) => {
                 assert_eq!(0x1000, len);
                 assert_eq!(0x1000, addr_start);

@@ -139,7 +139,7 @@ impl AddressingMode {
             )),
             AddressingMode::ZeroPageXIndexedIndirect(v) => {
                 let dst_addr = little_endian(
-                    memory.read((v[0] as usize + registers.register_x as usize) % 0x100, 2)?,
+                    memory.read_n((v[0] as usize + registers.register_x as usize) % 0x100, 2)?,
                 );
 
                 if dst_addr > memory::MEMMAX {
@@ -158,7 +158,7 @@ impl AddressingMode {
             }
             AddressingMode::ZeroPageIndirectYIndexed(v) => {
                 let dst_addr =
-                    little_endian(memory.read(v[0] as usize, 2)?) + registers.register_y as usize;
+                    little_endian(memory.read_n(v[0] as usize, 2)?) + registers.register_y as usize;
 
                 if dst_addr > memory::MEMMAX {
                     Err(ResolutionError::Solving(
@@ -175,7 +175,7 @@ impl AddressingMode {
                 }
             }
             AddressingMode::ZeroPageIndirect(v) => {
-                let dst_addr = little_endian(memory.read(v[0] as usize, 2)?);
+                let dst_addr = little_endian(memory.read_n(v[0] as usize, 2)?);
                 Ok(AddressingModeResolution::new(
                     vec![v[0]],
                     self.clone(),
@@ -202,7 +202,7 @@ impl AddressingMode {
             AddressingMode::AbsoluteXIndexedIndirect(v) => {
                 let bytes = vec![v[0], v[1]];
                 let tmp_addr = little_endian(bytes.clone()) + registers.register_x as usize;
-                let dest_addr = little_endian(memory.read(tmp_addr, 2)?);
+                let dest_addr = little_endian(memory.read_n(tmp_addr, 2)?);
                 Ok(AddressingModeResolution::new(
                     bytes,
                     self.clone(),
@@ -220,7 +220,7 @@ impl AddressingMode {
             }
             AddressingMode::Indirect(v) => {
                 let bytes = vec![v[0], v[1]];
-                let dst_addr = little_endian(memory.read(little_endian(bytes.clone()), 2)?);
+                let dst_addr = little_endian(memory.read_n(little_endian(bytes.clone()), 2)?);
                 Ok(AddressingModeResolution::new(
                     bytes,
                     self.clone(),

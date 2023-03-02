@@ -240,7 +240,7 @@ impl AddressableIO for MiniFBMemory {
         MINIFB_WIDTH * MINIFB_HEIGHT / 2 + BUFFER_VIDEO_START_ADDR
     }
 
-    fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
+    fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
         let buffer = self.buffer.lock().unwrap();
         if buffer.len() >= addr + len {
             Ok(buffer[addr..addr + len].to_vec())

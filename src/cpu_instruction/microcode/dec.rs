@@ -10,7 +10,7 @@ pub fn dec(
             .addressing_mode
             .solve(registers.command_pointer, memory, registers)?;
     let byte = match resolution.target_address {
-        Some(addr) => memory.read(addr, 1)?[0],
+        Some(addr) => memory.read_n(addr, 1)?[0],
         None => registers.accumulator,
     };
     let (res, _) = byte.overflowing_sub(1);
@@ -67,7 +67,7 @@ mod tests {
         let _log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();
-        assert_eq!(0x0f, memory.read(0xa0, 1).unwrap()[0]);
+        assert_eq!(0x0f, memory.read_n(0xa0, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert!(!registers.n_flag_is_set());
         assert_eq!(0x1002, registers.command_pointer);

@@ -35,7 +35,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("PHA".to_owned(), log_line.mnemonic);
-        assert_eq!(0x10, memory.read(STACK_BASE_ADDR + 0x00ff, 1).unwrap()[0]);
+        assert_eq!(0x10, memory.read_n(STACK_BASE_ADDR + 0x00ff, 1).unwrap()[0]);
         assert_eq!(0xfe, registers.stack_pointer);
         assert_eq!(0x1001, registers.command_pointer);
     }

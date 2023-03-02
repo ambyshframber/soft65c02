@@ -13,7 +13,7 @@ pub fn cpx(
         .target_address
         .expect("CPX must have operands, crashing the application");
 
-    let byte = memory.read(target_address, 1)?[0];
+    let byte = memory.read_n(target_address, 1)?[0];
 
     registers.set_c_flag(registers.register_x >= byte);
     registers.set_z_flag(registers.register_x == byte);

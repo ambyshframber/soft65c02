@@ -9,13 +9,14 @@ use std::error::Error;
 use std::convert::From;
 use std::result::Result;
 use std::fmt;
+
 fn resolve_opcode(address: usize, opcode: u8, memory: &Memory) -> Result<CPUInstruction, CPUError> {
     use microcode as mc;
     use AddressingMode as AM;
     use CPUInstruction as instr;
 
     let (op1, op2) = {
-        let y = memory.read(address + 1, 2)?;
+        let y = memory.read_n(address + 1, 2)?;
         ([y[0]], [y[0], y[1]])
     };
     let instruction = match opcode {
@@ -344,28 +345,27 @@ fn resolve_opcode(address: usize, opcode: u8, memory: &Memory) -> Result<CPUInst
             instr::new(address, opcode, "NOP", AM::Implied, mc::nop),
         0x44 | 0x54 | 0xd4 | 0xf4 => instr::new(address, opcode, "NOP", AM::ZeroPageXIndexed(op1), mc::nop),
         0x5c | 0xdc | 0xfc => instr::new(address, opcode, "NOP", AM::Absolute(op2), mc::nop),
-        _ => panic!(
-            "Yet unsupported instruction opcode 0x{:02x} at address #0x{:04X}.",
-            opcode, address
-        ),
+        _ => return Err(CPUError::DecodeError(address, opcode))
     };
 
     Ok(instruction)
 }
 
 pub fn execute_step(registers: &mut Registers, memory: &mut Memory) -> Result<LogLine, CPUError> {
+    memory.update();
     let cpu_instruction = read_step(registers.command_pointer, memory)?;
     Ok(cpu_instruction.execute(memory, registers)?)
 }
 
 pub fn read_step(address: usize, memory: &Memory) -> Result<CPUInstruction, CPUError> {
-    let opcode = memory.read(address, 1)?[0];
-    Ok(resolve_opcode(address, opcode, memory)?)
+    let opcode = memory.read_n(address, 1)?[0];
+    resolve_opcode(address, opcode, memory)
 }
 
 pub fn disassemble(start: usize, end: usize, memory: &Memory) -> Result<Vec<CPUInstruction>, CPUError> {
     let mut cp = start;
-    let mut output: Vec<CPUInstruction> = vec![];
+    let mut output: Vec<CPUInstruction> = Vec::with_capacity((end - start) * 2);
+    // TODO: more accurate guess
 
     while cp < end {
         let cpu_instruction = read_step(cp, memory)?;
@@ -407,6 +407,7 @@ impl Iterator for MemoryParserIterator<'_> {
 pub enum CPUError {
     MemoryError(MemoryError),
     MicrocodeError(MicrocodeError),
+    DecodeError(usize, u8)
 }
 
 impl Error for CPUError {}
@@ -416,6 +417,11 @@ impl fmt::Display for CPUError {
         match self {
             CPUError::MemoryError(e)  => write!(f, "CPU Error (memory) {}", e),
             CPUError::MicrocodeError(e)  => write!(f, "CPU Error (microcode) {}", e),
+            CPUError::DecodeError(addr, opcode)  => write!(
+                f,
+                "Yet unsupported instruction opcode 0x{:02x} at address #0x{:04X}.",
+                opcode, addr
+            ),
         }
     }
 }
@@ -440,7 +446,7 @@ mod tests {
     fn test_dex() {
         let memory = Memory::new_with_ram();
         let instr: CPUInstruction = resolve_opcode(0x1000, 0xca, &memory).unwrap();
-        assert_eq!("DEX".to_owned(), instr.mnemonic);
+        assert_eq!("DEX", instr.mnemonic);
         assert_eq!(AddressingMode::Implied, instr.addressing_mode);
     }
 
@@ -462,6 +468,6 @@ mod tests {
         memory.write(0x1000, &vec![0xca]).unwrap();
         let cpu_instruction: CPUInstruction = read_step(0x1000, &memory).unwrap();
         assert_eq!(0x1000, cpu_instruction.address);
-        assert_eq!("DEX".to_owned(), cpu_instruction.mnemonic);
+        assert_eq!("DEX", cpu_instruction.mnemonic);
     }
 }

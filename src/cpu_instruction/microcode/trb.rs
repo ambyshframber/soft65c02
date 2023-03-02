@@ -13,7 +13,7 @@ pub fn trb(
         .target_address
         .expect("TRB must have operands, crashing the application");
 
-    let mut byte = memory.read(target_address, 1)?[0];
+    let mut byte = memory.read_n(target_address, 1)?[0];
     if byte & registers.accumulator != 0 {
         byte = byte & (registers.accumulator ^ 0xff);
         memory.write(target_address, &vec![byte])?;
@@ -49,7 +49,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("TRB".to_owned(), log_line.mnemonic);
-        assert_eq!(0x84, memory.read(0x00, 1).unwrap()[0]);
+        assert_eq!(0x84, memory.read_n(0x00, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert_eq!(0x33, registers.accumulator);
         assert_eq!(0x1002, registers.command_pointer);
@@ -65,7 +65,7 @@ mod tests {
         let _log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();
-        assert_eq!(0xa6, memory.read(0x00, 1).unwrap()[0]);
+        assert_eq!(0xa6, memory.read_n(0x00, 1).unwrap()[0]);
         assert!(registers.z_flag_is_set());
         assert_eq!(0x41, registers.accumulator);
         assert_eq!(0x1002, registers.command_pointer);

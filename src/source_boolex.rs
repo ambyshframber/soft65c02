@@ -20,7 +20,7 @@ impl Source {
             Source::RegisterY => registers.register_y as usize,
             Source::RegisterSP => registers.get_status_register() as usize,
             Source::RegisterS => registers.stack_pointer as usize,
-            Source::Memory(addr) => memory.read(addr, 1).unwrap()[0] as usize,
+            Source::Memory(addr) => memory.read_n(addr, 1).unwrap()[0] as usize,
             Source::RegisterCP => registers.command_pointer as usize,
         }
     }

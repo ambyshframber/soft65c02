@@ -38,7 +38,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("STZ".to_owned(), log_line.mnemonic);
-        assert_eq!(0x00, memory.read(0x1000, 1).unwrap()[0]);
+        assert_eq!(0x00, memory.read_n(0x1000, 1).unwrap()[0]);
         assert_eq!(0x1003, registers.command_pointer);
     }
 }

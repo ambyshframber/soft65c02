@@ -52,7 +52,7 @@ mod tests {
         assert_eq!(0xfd, registers.stack_pointer);
         assert_eq!(
             vec![0x02, 0x10],
-            memory.read(STACK_BASE_ADDR + 0xfe, 2).unwrap()
+            memory.read_n(STACK_BASE_ADDR + 0xfe, 2).unwrap()
         );
     }
 }

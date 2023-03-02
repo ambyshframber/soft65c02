@@ -13,7 +13,7 @@ pub fn tsb(
         .target_address
         .expect("TSB must have operands, crashing the application");
 
-    let byte = memory.read(target_address, 1)?[0];
+    let byte = memory.read_n(target_address, 1)?[0];
     registers.set_z_flag(byte & registers.accumulator == 0);
     let res = byte | registers.accumulator;
     memory.write(target_address, &vec![res])?;
@@ -45,7 +45,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("TSB".to_owned(), log_line.mnemonic);
-        assert_eq!(0xb7, memory.read(0x0a, 1).unwrap()[0]);
+        assert_eq!(0xb7, memory.read_n(0x0a, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert_eq!(0x1002, registers.command_pointer);
     }
@@ -60,7 +60,7 @@ mod tests {
         let _log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();
-        assert_eq!(0xe7, memory.read(0x0a, 1).unwrap()[0]);
+        assert_eq!(0xe7, memory.read_n(0x0a, 1).unwrap()[0]);
         assert!(registers.z_flag_is_set());
         assert_eq!(0x1002, registers.command_pointer);
     }

@@ -12,7 +12,7 @@ pub fn rmb(
     let addr = resolution
         .target_address
         .expect("RMB must have operands, crashing the application");
-    let byte = memory.read(addr, 1)?[0];
+    let byte = memory.read_n(addr, 1)?[0];
     let mut bit = 0b00000001;
     (0..cpu_instruction.opcode >> 4).for_each(|_| bit = bit << 1);
     let bit = 0b11111111 ^ bit;
@@ -43,7 +43,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("RMB0".to_owned(), log_line.mnemonic);
-        assert_eq!(0xfe, memory.read(0x0a, 1).unwrap()[0]);
+        assert_eq!(0xfe, memory.read_n(0x0a, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert!(!registers.n_flag_is_set());
         assert!(!registers.c_flag_is_set());
@@ -65,7 +65,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("RMB7".to_owned(), log_line.mnemonic);
-        assert_eq!(0x7f, memory.read(0x0a, 1).unwrap()[0]);
+        assert_eq!(0x7f, memory.read_n(0x0a, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert!(!registers.n_flag_is_set());
         assert!(!registers.c_flag_is_set());

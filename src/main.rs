@@ -242,7 +242,7 @@ fn exec_run_instruction(
                 registers.command_pointer = parse_memory(node.as_str()[3..].to_owned()),
             Rule::boolean_condition => stop_condition = parse_boolex(node.into_inner()),
             Rule::init_vector =>
-                registers.command_pointer = little_endian(memory.read(INIT_VECTOR_ADDR, 2).unwrap()),
+                registers.command_pointer = little_endian(memory.read_n(INIT_VECTOR_ADDR, 2).unwrap()),
             _ => {}
         };
     }
@@ -389,7 +389,7 @@ fn mem_dump(start: usize, len: usize, memory: &Memory) -> Result<Vec<String>, Me
     let mut output:Vec<String> = vec![];
     if len == 0 { return Ok(output) }
     let address = start - (start % 16);
-    let bytes = memory.read(address, 16 * len)?;
+    let bytes = memory.read_n(address, 16 * len)?;
 
     for lineno in 0..len {
         let mut line = format!("#{:04X}: ", address + lineno * 16);

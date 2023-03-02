@@ -7,7 +7,7 @@ use std::fmt;
 pub struct CPUInstruction {
     pub address: usize,
     pub opcode: u8,
-    pub mnemonic: String,
+    pub mnemonic: &'static str, // saves on allocations
     pub addressing_mode: AddressingMode,
     pub microcode:
         Box<dyn Fn(&mut Memory, &mut Registers, &CPUInstruction) -> MicrocodeResult<LogLine>>,
@@ -17,16 +17,13 @@ impl CPUInstruction {
     pub fn new(
         address: usize,
         opcode: u8,
-        mnemonic: &str,
+        mnemonic: &'static str,
         addressing_mode: AddressingMode,
         microcode: impl Fn(&mut Memory, &mut Registers, &CPUInstruction) -> MicrocodeResult<LogLine>
             + 'static,
     ) -> CPUInstruction {
         CPUInstruction {
-            address: address,
-            opcode: opcode,
-            mnemonic: mnemonic.to_owned(),
-            addressing_mode: addressing_mode,
+            address, opcode, mnemonic, addressing_mode,
             microcode: Box::new(microcode),
         }
     }
@@ -67,7 +64,7 @@ impl fmt::Display for CPUInstruction {
 pub struct LogLine {
     pub address: usize,
     pub opcode: u8,
-    pub mnemonic: String,
+    pub mnemonic: &'static str,
     pub resolution: AddressingModeResolution,
     pub outcome: String,
 }
@@ -81,9 +78,8 @@ impl LogLine {
         LogLine {
             address: cpu_instruction.address,
             opcode: cpu_instruction.opcode,
-            mnemonic: cpu_instruction.mnemonic.clone(),
-            resolution: resolution,
-            outcome: outcome,
+            mnemonic: cpu_instruction.mnemonic,
+            resolution, outcome,
         }
     }
 }

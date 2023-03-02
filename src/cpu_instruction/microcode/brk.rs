@@ -20,7 +20,7 @@ pub fn brk(
     registers.stack_push(memory, bytes[1])?;
     registers.stack_push(memory, bytes[0])?;
     registers.stack_push(memory, registers.get_status_register())?;
-    registers.command_pointer = little_endian(memory.read(INTERRUPT_VECTOR_ADDR, 2)?);
+    registers.command_pointer = little_endian(memory.read_n(INTERRUPT_VECTOR_ADDR, 2)?);
     registers.set_i_flag(true);
     registers.set_d_flag(false);
 
@@ -54,7 +54,7 @@ mod tests {
         assert_eq!(0xfc, registers.stack_pointer);
         assert_eq!(
             vec![0b00110000, 0x02, 0x10],
-            memory.read(STACK_BASE_ADDR + 0xfd, 3).unwrap()
+            memory.read_n(STACK_BASE_ADDR + 0xfd, 3).unwrap()
         );
         assert!(registers.i_flag_is_set());
         assert!(!registers.d_flag_is_set());

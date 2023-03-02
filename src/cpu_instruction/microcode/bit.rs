@@ -13,7 +13,7 @@ pub fn bit(
         .target_address
         .expect("BIT must have operands, crashing the application");
 
-    let byte = memory.read(target_address, 1)?[0];
+    let byte = memory.read_n(target_address, 1)?[0];
     registers.set_z_flag(registers.accumulator & byte == 0);
 
     /*

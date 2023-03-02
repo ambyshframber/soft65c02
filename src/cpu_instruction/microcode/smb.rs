@@ -10,7 +10,7 @@ pub fn smb(
             .addressing_mode
             .solve(registers.command_pointer, memory, registers)?;
     let addr = resolution.target_address.expect("SMB expects an operand, crashing the application");
-    let byte = memory.read(addr, 1)?[0];
+    let byte = memory.read_n(addr, 1)?[0];
     let mut bit = 0b00000001;
     (0..(cpu_instruction.opcode >> 4) - 8).for_each(|_| bit = bit << 1);
     let byte = byte | bit;
@@ -39,7 +39,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("SMB0".to_owned(), log_line.mnemonic);
-        assert_eq!(0x01, memory.read(0x0a, 1).unwrap()[0]);
+        assert_eq!(0x01, memory.read_n(0x0a, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert!(!registers.n_flag_is_set());
         assert!(!registers.c_flag_is_set());
@@ -60,7 +60,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("SMB7".to_owned(), log_line.mnemonic);
-        assert_eq!(0x80, memory.read(0x0a, 1).unwrap()[0]);
+        assert_eq!(0x80, memory.read_n(0x0a, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert!(!registers.n_flag_is_set());
         assert!(!registers.c_flag_is_set());

@@ -10,7 +10,7 @@ pub fn inc(
             .addressing_mode
             .solve(registers.command_pointer, memory, registers)?;
     let mut byte = match resolution.target_address {
-        Some(addr) => memory.read(addr, 1)?[0],
+        Some(addr) => memory.read_n(addr, 1)?[0],
         None => registers.accumulator,
     };
 
@@ -53,7 +53,7 @@ mod tests {
             .execute(&mut memory, &mut registers)
             .unwrap();
         assert_eq!("INC".to_owned(), log_line.mnemonic);
-        assert_eq!(0x29, memory.read(0x0a, 1).unwrap()[0]);
+        assert_eq!(0x29, memory.read_n(0x0a, 1).unwrap()[0]);
         assert!(!registers.z_flag_is_set());
         assert!(!registers.n_flag_is_set());
         assert_eq!(0x1002, registers.command_pointer);

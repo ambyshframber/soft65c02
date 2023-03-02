@@ -36,7 +36,7 @@ mod tests {
             .unwrap();
         assert_eq!("[SP=0xfe]", format!("{}", log_line.outcome));
         assert_eq!("PHX".to_owned(), log_line.mnemonic);
-        assert_eq!(0xa1, memory.read(STACK_BASE_ADDR + 0x00ff, 1).unwrap()[0]);
+        assert_eq!(0xa1, memory.read_n(STACK_BASE_ADDR + 0x00ff, 1).unwrap()[0]);
         assert_eq!(0xfe, registers.stack_pointer);
         assert_eq!(0x1001, registers.command_pointer);
     }

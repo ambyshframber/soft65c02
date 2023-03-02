@@ -12,7 +12,7 @@ pub fn bbs(
     let target_address = resolution
         .target_address
         .expect("BBS must have operands, crashing the application");
-    let byte = memory.read(target_address, 1)?[0];
+    let byte = memory.read_n(target_address, 1)?[0];
     let mut bit = 0b00000001;
     (0..(cpu_instruction.opcode >> 4) - 8).for_each(|_| bit = bit << 1);
 

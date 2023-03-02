@@ -14,7 +14,7 @@ impl RAM {
 }
 
 impl AddressableIO for RAM {
-    fn read(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
+    fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
         if self.ram.len() >= addr + len {
             Ok(self.ram[addr..addr + len].to_vec())
         } else {
