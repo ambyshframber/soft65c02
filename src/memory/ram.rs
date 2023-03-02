@@ -14,6 +14,10 @@ impl RAM {
 }
 
 impl AddressableIO for RAM {
+    fn read_1(&self, addr: usize) -> MemResult<u8> {
+        self.ram.get(addr).copied().ok_or(MemoryError::ReadOverflow(1, addr))
+    }
+
     fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
         if self.ram.len() >= addr + len {
             Ok(self.ram[addr..addr + len].to_vec())

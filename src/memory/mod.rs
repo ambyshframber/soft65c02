@@ -16,6 +16,8 @@ pub use rom::ROM;
 
 pub const MEMMAX: usize = 65535;
 
+type MemResult<T> = Result<T, MemoryError>;
+
 /// Convert a little-endian vector of bytes into a usize.
 pub fn little_endian(bytes: Vec<u8>) -> usize {
     let mut addr: usize = 0;
@@ -29,8 +31,21 @@ pub fn little_endian(bytes: Vec<u8>) -> usize {
 
 /// This trait defines the interface for all memory systems
 pub trait AddressableIO {
-    fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError>;
-    fn write(&mut self, location: usize, data: &[u8]) -> Result<(), MemoryError>;
+    fn read_1(&self, addr: usize) -> MemResult<u8>;
+    fn read_2(&self, addr: usize) -> MemResult<[u8; 2]> {
+        let lo = self.read_1(addr)?;
+        let hi = self.read_1(addr + 1)?;
+        Ok([lo, hi])
+    }
+    fn read_le_u16(&self, addr: usize) -> MemResult<u16> {
+        Ok(u16::from_le_bytes(self.read_2(addr)?))
+    }
+    fn read_n(&self, addr: usize, len: usize) -> MemResult<Vec<u8>> {
+        (addr..addr + len).map(|addr| self.read_1(addr)).collect()
+    }
+
+    fn write(&mut self, location: usize, data: &[u8]) -> MemResult<()>;
+    
     fn get_size(&self) -> usize;
     /// returns `true` if the device is asserting an interrupt
     fn update(&mut self) -> bool { false }

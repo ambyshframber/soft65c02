@@ -35,6 +35,10 @@ impl Subsystem {
 }
 
 impl AddressableIO for Subsystem {
+    fn read_1(&self, addr: usize) -> MemResult<u8> {
+        self.subsystem.read_1(addr)
+    }
+
     fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
         self.subsystem.read_n(addr, len)
     }
@@ -132,8 +136,15 @@ impl MemoryStack {
 }
 
 impl AddressableIO for MemoryStack {
+    fn read_1(&self, addr: usize) -> MemResult<u8> {
+        let sub_idx = self.address_map.iter()
+            .find(|(split, _)| **split >= addr)
+            .ok_or(MemoryError::Other(addr, "reading unallocated memory"))?.1;
+        self.stack[*sub_idx].read_1(addr)
+    }
+
     fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
-        let mut results:Vec<u8> = Vec::with_capacity(len);
+        let mut results: Vec<u8> = Vec::with_capacity(len);
         let mut tmplen = len;
         let mut tmpaddr = addr;
         for (&addr_split, &sub_index) in &self.address_map {
@@ -213,6 +224,15 @@ mod tests {
     impl AddressableIO for FakeMemory {
         fn get_size(&self) -> usize {
             self.size
+        }
+
+        fn read_1(&self, addr: usize) -> MemResult<u8> {
+            if addr > self.size {
+                Err(MemoryError::ReadOverflow(1, addr))
+            }
+            else {
+                Ok(self.content)
+            }
         }
 
         fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {

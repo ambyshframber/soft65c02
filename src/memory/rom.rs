@@ -14,6 +14,9 @@ impl ROM {
 }
 
 impl AddressableIO for ROM {
+    fn read_1(&self, addr: usize) -> MemResult<u8> {
+        self.rom.get(addr).copied().ok_or(MemoryError::ReadOverflow(1, addr))
+    }
     fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
         if self.rom.len() >= addr + len {
             Ok(self.rom[addr..addr + len].to_vec())
