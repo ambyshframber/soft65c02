@@ -13,7 +13,7 @@ pub fn cpy(
         .target_address
         .expect("CPY must have operands, crashing the application");
 
-    let byte = memory.read_n(target_address, 1)?[0];
+    let byte = memory.read_1(target_address)?;
 
     registers.set_c_flag(registers.register_y >= byte);
     registers.set_z_flag(registers.register_y == byte);

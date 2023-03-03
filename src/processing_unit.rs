@@ -16,7 +16,7 @@ fn resolve_opcode(address: usize, opcode: u8, memory: &Memory) -> Result<CPUInst
     use CPUInstruction as instr;
 
     let (op1, op2) = {
-        let y = memory.read_n(address + 1, 2)?;
+        let y = memory.read_2(address + 1)?;
         ([y[0]], [y[0], y[1]])
     };
     let instruction = match opcode {
@@ -358,7 +358,7 @@ pub fn execute_step(registers: &mut Registers, memory: &mut Memory) -> Result<Lo
 }
 
 pub fn read_step(address: usize, memory: &Memory) -> Result<CPUInstruction, CPUError> {
-    let opcode = memory.read_n(address, 1)?[0];
+    let opcode = memory.read_1(address)?;
     resolve_opcode(address, opcode, memory)
 }
 

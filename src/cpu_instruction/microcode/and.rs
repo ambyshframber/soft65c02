@@ -13,7 +13,7 @@ pub fn and(
         .target_address
         .expect("AND must have operands, crashing the application");
 
-    let byte = memory.read_n(target_address, 1)?[0];
+    let byte = memory.read_1(target_address)?;
     registers.accumulator &= byte;
     registers.set_z_flag(registers.accumulator == 0);
     registers.set_n_flag(registers.accumulator & 0x80 != 0);

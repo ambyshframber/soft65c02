@@ -10,7 +10,7 @@ pub fn inc(
             .addressing_mode
             .solve(registers.command_pointer, memory, registers)?;
     let mut byte = match resolution.target_address {
-        Some(addr) => memory.read_n(addr, 1)?[0],
+        Some(addr) => memory.read_1(addr)?,
         None => registers.accumulator,
     };
 

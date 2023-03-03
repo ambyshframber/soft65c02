@@ -102,7 +102,7 @@ impl Registers {
     pub fn stack_pull(&mut self, memory: &Memory) -> std::result::Result<u8, MemoryError> {
         let (sp, _) = self.stack_pointer.overflowing_add(1);
         self.stack_pointer = sp;
-        Ok(memory.read_n(STACK_BASE_ADDR + self.stack_pointer as usize, 1)?[0])
+        memory.read_1(STACK_BASE_ADDR + self.stack_pointer as usize)
     }
 
     flag_fns!(n_flag_is_set, set_n_flag, N_SHIFT);

@@ -18,7 +18,7 @@ use rustyline::Result as RustyResult;
 use rustyline::{Context, Editor};
 
 use soft65c02::{AddressableIO, LogLine, Memory, MemoryParserIterator, Registers, INIT_VECTOR_ADDR};
-use soft65c02::memory::{little_endian, MiniFBMemory, MemoryError };
+use soft65c02::memory::{MiniFBMemory, MemoryError };
 use soft65c02::source_boolex::*;
 
 use structopt::StructOpt;
@@ -242,7 +242,7 @@ fn exec_run_instruction(
                 registers.command_pointer = parse_memory(node.as_str()[3..].to_owned()),
             Rule::boolean_condition => stop_condition = parse_boolex(node.into_inner()),
             Rule::init_vector =>
-                registers.command_pointer = little_endian(memory.read_n(INIT_VECTOR_ADDR, 2).unwrap()),
+                registers.command_pointer = memory.read_le_u16(INIT_VECTOR_ADDR).unwrap() as usize,
             _ => {}
         };
     }

@@ -42,7 +42,7 @@ impl fmt::Display for CPUInstruction {
         let mut bytes = vec![self.opcode];
 
         for i in self.addressing_mode.get_operands() {
-            bytes.push(i);
+            bytes.push(*i);
         }
         let byte_sequence = format!(
             "({})",

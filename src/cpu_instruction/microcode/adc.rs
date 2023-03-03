@@ -21,7 +21,7 @@ pub fn adc(
     let target_address = resolution
         .target_address
         .expect("ADC must have operands, crashing the application");
-    let byte = memory.read_n(target_address, 1)?[0];
+    let byte = memory.read_1(target_address)?;
     let a = registers.accumulator;
 
     if registers.d_flag_is_set() {

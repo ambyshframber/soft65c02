@@ -12,7 +12,7 @@ pub fn rmb(
     let addr = resolution
         .target_address
         .expect("RMB must have operands, crashing the application");
-    let byte = memory.read_n(addr, 1)?[0];
+    let byte = memory.read_1(addr)?;
     let mut bit = 0b00000001;
     (0..cpu_instruction.opcode >> 4).for_each(|_| bit = bit << 1);
     let bit = 0b11111111 ^ bit;

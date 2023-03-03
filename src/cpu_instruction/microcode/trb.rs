@@ -13,7 +13,7 @@ pub fn trb(
         .target_address
         .expect("TRB must have operands, crashing the application");
 
-    let mut byte = memory.read_n(target_address, 1)?[0];
+    let mut byte = memory.read_1(target_address)?;
     if byte & registers.accumulator != 0 {
         byte = byte & (registers.accumulator ^ 0xff);
         memory.write(target_address, &vec![byte])?;

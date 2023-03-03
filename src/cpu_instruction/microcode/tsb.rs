@@ -13,7 +13,7 @@ pub fn tsb(
         .target_address
         .expect("TSB must have operands, crashing the application");
 
-    let byte = memory.read_n(target_address, 1)?[0];
+    let byte = memory.read_1(target_address)?;
     registers.set_z_flag(byte & registers.accumulator == 0);
     let res = byte | registers.accumulator;
     memory.write(target_address, &vec![res])?;

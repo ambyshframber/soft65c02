@@ -57,9 +57,7 @@ impl AddressingModeResolution {
         target_address: Option<usize>,
     ) -> Self {
         AddressingModeResolution {
-            operands: operands,
-            addressing_mode: addressing_mode,
-            target_address: target_address,
+            operands, addressing_mode, target_address,
         }
     }
 }
@@ -138,9 +136,7 @@ impl AddressingMode {
                 Some((v[0] as usize + registers.register_y as usize) % 0x100),
             )),
             AddressingMode::ZeroPageXIndexedIndirect(v) => {
-                let dst_addr = little_endian(
-                    memory.read_n((v[0] as usize + registers.register_x as usize) % 0x100, 2)?,
-                );
+                let dst_addr = memory.read_le_u16((v[0] as usize + registers.register_x as usize) % 0x100)? as usize;
 
                 if dst_addr > memory::MEMMAX {
                     Err(ResolutionError::Solving(
@@ -158,7 +154,7 @@ impl AddressingMode {
             }
             AddressingMode::ZeroPageIndirectYIndexed(v) => {
                 let dst_addr =
-                    little_endian(memory.read_n(v[0] as usize, 2)?) + registers.register_y as usize;
+                    memory.read_le_u16(v[0] as usize)? as usize + registers.register_y as usize;
 
                 if dst_addr > memory::MEMMAX {
                     Err(ResolutionError::Solving(
@@ -175,7 +171,7 @@ impl AddressingMode {
                 }
             }
             AddressingMode::ZeroPageIndirect(v) => {
-                let dst_addr = little_endian(memory.read_n(v[0] as usize, 2)?);
+                let dst_addr = memory.read_le_u16(v[0] as usize)? as usize;
                 Ok(AddressingModeResolution::new(
                     vec![v[0]],
                     self.clone(),
@@ -201,8 +197,8 @@ impl AddressingMode {
             }
             AddressingMode::AbsoluteXIndexedIndirect(v) => {
                 let bytes = vec![v[0], v[1]];
-                let tmp_addr = little_endian(bytes.clone()) + registers.register_x as usize;
-                let dest_addr = little_endian(memory.read_n(tmp_addr, 2)?);
+                let tmp_addr = u16::from_le_bytes(v) as usize + registers.register_x as usize;
+                let dest_addr = memory.read_le_u16(tmp_addr)? as usize;
                 Ok(AddressingModeResolution::new(
                     bytes,
                     self.clone(),
@@ -211,7 +207,7 @@ impl AddressingMode {
             }
             AddressingMode::AbsoluteYIndexed(v) => {
                 let bytes = vec![v[0], v[1]];
-                let dest_addr = little_endian(bytes.clone()) + registers.register_y as usize;
+                let dest_addr = u16::from_le_bytes(v) as usize + registers.register_y as usize;
                 Ok(AddressingModeResolution::new(
                     bytes,
                     self.clone(),
@@ -220,7 +216,7 @@ impl AddressingMode {
             }
             AddressingMode::Indirect(v) => {
                 let bytes = vec![v[0], v[1]];
-                let dst_addr = little_endian(memory.read_n(little_endian(bytes.clone()), 2)?);
+                let dst_addr = memory.read_le_u16(u16::from_le_bytes(v) as usize)? as usize;
                 Ok(AddressingModeResolution::new(
                     bytes,
                     self.clone(),
@@ -244,24 +240,25 @@ impl AddressingMode {
         }
     }
 
-    pub fn get_operands(&self) -> Vec<u8> {
-        match *self {
-            AddressingMode::Implied => vec![],
-            AddressingMode::Accumulator => vec![],
-            AddressingMode::Immediate(v) => v.to_vec(),
-            AddressingMode::ZeroPage(v) => v.to_vec(),
-            AddressingMode::ZeroPageXIndexed(v) => v.to_vec(),
-            AddressingMode::ZeroPageYIndexed(v) => v.to_vec(),
-            AddressingMode::ZeroPageXIndexedIndirect(v) => v.to_vec(),
-            AddressingMode::ZeroPageIndirectYIndexed(v) => v.to_vec(),
-            AddressingMode::ZeroPageIndirect(v) => v.to_vec(),
-            AddressingMode::Absolute(v) => v.to_vec(),
-            AddressingMode::AbsoluteXIndexed(v) => v.to_vec(),
-            AddressingMode::AbsoluteXIndexedIndirect(v) => v.to_vec(),
-            AddressingMode::AbsoluteYIndexed(v) => v.to_vec(),
-            AddressingMode::Indirect(v) => v.to_vec(),
-            AddressingMode::Relative(_addr, v) => v.to_vec(),
-            AddressingMode::ZeroPageRelative(_addr, v) => v.to_vec(),
+    const NO_OPERANDS: &[u8] = &[];
+    pub fn get_operands(&self) -> &[u8] {
+        match self {
+            AddressingMode::Implied => Self::NO_OPERANDS,
+            AddressingMode::Accumulator => Self::NO_OPERANDS,
+            AddressingMode::Immediate(v) => v,
+            AddressingMode::ZeroPage(v) => v,
+            AddressingMode::ZeroPageXIndexed(v) => v,
+            AddressingMode::ZeroPageYIndexed(v) => v,
+            AddressingMode::ZeroPageXIndexedIndirect(v) => v,
+            AddressingMode::ZeroPageIndirectYIndexed(v) => v,
+            AddressingMode::ZeroPageIndirect(v) => v,
+            AddressingMode::Absolute(v) => v,
+            AddressingMode::AbsoluteXIndexed(v) => v,
+            AddressingMode::AbsoluteXIndexedIndirect(v) => v,
+            AddressingMode::AbsoluteYIndexed(v) => v,
+            AddressingMode::Indirect(v) => v,
+            AddressingMode::Relative(_addr, v) => v,
+            AddressingMode::ZeroPageRelative(_addr, v) => v,
         }
     }
 }

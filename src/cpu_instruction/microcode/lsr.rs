@@ -11,7 +11,7 @@ pub fn lsr(
             .solve(registers.command_pointer, memory, registers)?;
 
     let byte = match resolution.target_address {
-        Some(addr) => memory.read_n(addr, 1)?[0],
+        Some(addr) => memory.read_1(addr)?,
         None => registers.accumulator,
     };
 

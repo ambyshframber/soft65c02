@@ -10,7 +10,7 @@ pub fn smb(
             .addressing_mode
             .solve(registers.command_pointer, memory, registers)?;
     let addr = resolution.target_address.expect("SMB expects an operand, crashing the application");
-    let byte = memory.read_n(addr, 1)?[0];
+    let byte = memory.read_1(addr)?;
     let mut bit = 0b00000001;
     (0..(cpu_instruction.opcode >> 4) - 8).for_each(|_| bit = bit << 1);
     let byte = byte | bit;
