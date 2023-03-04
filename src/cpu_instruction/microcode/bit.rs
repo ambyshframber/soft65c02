@@ -26,7 +26,7 @@ pub fn bit(
             registers.set_n_flag(byte & 0b10000000 != 0);
         },
     };
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

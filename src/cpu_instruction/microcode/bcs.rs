@@ -16,7 +16,7 @@ pub fn bcs(
             cpu_instruction.addressing_mode.get_operands()[0]
         ).expect("Could not resolve relative address for BCS");
     } else {
-        registers.command_pointer += 1 + resolution.operands.len();
+        registers.command_pointer += 1 + resolution.operands().len();
     }
 
     Ok(LogLine::new(

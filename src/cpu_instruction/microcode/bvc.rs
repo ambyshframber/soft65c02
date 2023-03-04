@@ -11,7 +11,7 @@ pub fn bvc(
             .solve(registers.command_pointer, memory, registers)?;
 
     if registers.v_flag_is_set() {
-        registers.command_pointer += 1 + resolution.operands.len();
+        registers.command_pointer += 1 + resolution.operands().len();
     } else {
         registers.command_pointer = resolve_relative(
             cpu_instruction.address,

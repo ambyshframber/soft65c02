@@ -14,7 +14,7 @@ pub fn sta(
         .expect("STA must have operands, crashing the application");
 
     memory.write(target_address, &vec![registers.accumulator])?;
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

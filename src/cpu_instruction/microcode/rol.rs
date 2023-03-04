@@ -22,7 +22,7 @@ pub fn rol(
     registers.set_c_flag(byte & 0x80 != 0);
     registers.set_z_flag(res == 0);
     registers.set_n_flag(res & 0x80 != 0);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     let outcome = match resolution.target_address {
         Some(addr) => {

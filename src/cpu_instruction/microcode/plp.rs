@@ -12,7 +12,7 @@ pub fn plp(
 
     let status = registers.stack_pull(memory)?;
     registers.set_status_register(status);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

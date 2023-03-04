@@ -14,7 +14,7 @@ pub fn stx(
         .expect("STX must have operands, crashing the application");
 
     memory.write(target_address, &vec![registers.register_x])?;
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

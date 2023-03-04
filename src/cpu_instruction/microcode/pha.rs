@@ -11,7 +11,7 @@ pub fn pha(
             .solve(registers.command_pointer, memory, registers)?;
 
     registers.stack_push(memory, registers.accumulator)?;
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

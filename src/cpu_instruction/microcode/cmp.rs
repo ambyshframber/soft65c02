@@ -18,7 +18,7 @@ pub fn cmp(
     registers.set_c_flag(registers.accumulator >= byte);
     registers.set_z_flag(registers.accumulator == byte);
     registers.set_n_flag(registers.accumulator < byte);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

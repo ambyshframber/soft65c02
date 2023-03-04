@@ -17,7 +17,7 @@ pub fn bbr(
     (0..cpu_instruction.opcode >> 4).for_each(|_| bit = bit << 1);
 
     if byte & bit != 0 {
-        registers.command_pointer += 1 + resolution.operands.len();
+        registers.command_pointer += 1 + resolution.operands().len();
     } else {
         registers.command_pointer = resolve_relative(
             cpu_instruction.address + 1,

@@ -17,7 +17,7 @@ pub fn tsb(
     registers.set_z_flag(byte & registers.accumulator == 0);
     let res = byte | registers.accumulator;
     memory.write(target_address, &vec![res])?;
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

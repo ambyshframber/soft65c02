@@ -33,7 +33,7 @@ pub fn inc(
             format!("[A=0x{:02x}][S={}]", byte, registers.format_status())
         }
     };
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(&cpu_instruction, resolution, outcome))
 }

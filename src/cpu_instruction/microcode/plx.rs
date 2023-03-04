@@ -13,7 +13,7 @@ pub fn plx(
     registers.register_x = registers.stack_pull(memory)?;
     registers.set_z_flag(registers.register_x == 0);
     registers.set_n_flag(registers.register_x & 0x80 != 0);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

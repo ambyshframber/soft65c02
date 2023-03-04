@@ -1,0 +1,6 @@
+factor out vec in AddressingModeResolution - DONE
+figure out how the simulator starts up
+add interrupts
+add lua subsystem
+add actual reset vector
+add rom loading from disk

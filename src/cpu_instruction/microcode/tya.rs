@@ -13,7 +13,7 @@ pub fn tya(
     registers.accumulator = registers.register_y;
     registers.set_n_flag(registers.accumulator & 0b10000000 != 0);
     registers.set_z_flag(registers.accumulator == 0);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

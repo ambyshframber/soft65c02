@@ -11,7 +11,7 @@ pub fn cld(
             .solve(registers.command_pointer, memory, registers)?;
 
     registers.set_d_flag(false);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

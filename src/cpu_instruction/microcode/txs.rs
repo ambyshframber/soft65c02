@@ -11,7 +11,7 @@ pub fn txs(
             .solve(registers.command_pointer, memory, registers)?;
 
     registers.stack_pointer = registers.register_x;
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

@@ -87,8 +87,8 @@ impl LogLine {
 impl fmt::Display for LogLine {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut bytes = vec![self.opcode];
-        for i in self.resolution.operands.clone() {
-            bytes.push(i);
+        for i in self.resolution.operands() {
+            bytes.push(*i);
         }
         let byte_sequence = format!(
             "({})",

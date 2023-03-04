@@ -13,7 +13,7 @@ pub fn jsr(
         .target_address
         .expect("JSR must have an operand, crashing the application");
 
-    let bytes = usize::to_le_bytes(registers.command_pointer + resolution.operands.len());
+    let bytes = usize::to_le_bytes(registers.command_pointer + resolution.operands().len());
     registers.stack_push(memory, bytes[1])?;
     registers.stack_push(memory, bytes[0])?;
     registers.command_pointer = target_address;

@@ -18,7 +18,7 @@ pub fn iny(
         registers.set_z_flag(false);
     }
     registers.set_n_flag(registers.register_y & 0b10000000 != 0);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

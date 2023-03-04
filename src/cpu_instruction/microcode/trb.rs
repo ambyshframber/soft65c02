@@ -21,7 +21,7 @@ pub fn trb(
     } else {
         registers.set_z_flag(true);
     }
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

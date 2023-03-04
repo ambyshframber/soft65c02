@@ -16,7 +16,7 @@ pub fn ldx(
     registers.register_x = memory.read_1(target_address)?;
     registers.set_n_flag(registers.register_x & 0b10000000 != 0);
     registers.set_z_flag(registers.register_x == 0);
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,

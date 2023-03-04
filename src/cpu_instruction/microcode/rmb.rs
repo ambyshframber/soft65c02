@@ -19,7 +19,7 @@ pub fn rmb(
     let byte = byte & bit;
     memory.write(addr, &vec![byte])?;
 
-    registers.command_pointer += 1 + resolution.operands.len();
+    registers.command_pointer += 1 + resolution.operands().len();
 
     Ok(LogLine::new(
         &cpu_instruction,
