@@ -1,6 +1,6 @@
 use super::memory;
 use super::memory::MemoryStack as Memory;
-use super::memory::{little_endian, AddressableIO, MemoryError};
+use super::memory::{AddressableIO, MemoryError};
 use super::registers::Registers;
 use std::error;
 use std::fmt;
@@ -151,7 +151,7 @@ impl AddressingMode {
                 self.to_resolution(dst_addr)
             }
             AddressingMode::Absolute(v) => {
-                let dest_addr = little_endian(vec![v[0], v[1]]);
+                let dest_addr = u16::from_le_bytes(v) as usize;
                 self.to_resolution(dest_addr)
             }
             AddressingMode::AbsoluteXIndexed(v) => {

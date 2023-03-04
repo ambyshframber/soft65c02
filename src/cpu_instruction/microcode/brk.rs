@@ -20,7 +20,7 @@ pub fn brk(
     registers.stack_push(memory, bytes[1])?;
     registers.stack_push(memory, bytes[0])?;
     registers.stack_push(memory, registers.get_status_register())?;
-    registers.command_pointer = little_endian(memory.read_n(INTERRUPT_VECTOR_ADDR, 2)?);
+    registers.command_pointer = memory.read_le_u16(INTERRUPT_VECTOR_ADDR)? as usize;
     registers.set_i_flag(true);
     registers.set_d_flag(false);
 

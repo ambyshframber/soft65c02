@@ -18,17 +18,6 @@ pub const MEMMAX: usize = 65535;
 
 type MemResult<T> = Result<T, MemoryError>;
 
-/// Convert a little-endian vector of bytes into a usize.
-pub fn little_endian(bytes: Vec<u8>) -> usize {
-    let mut addr: usize = 0;
-
-    for byte in bytes.iter().rev() {
-        addr = addr << 8 | (*byte as usize);
-    }
-
-    addr
-}
-
 /// This trait defines the interface for all memory systems
 pub trait AddressableIO {
     fn read_1(&self, addr: usize) -> MemResult<u8>;
@@ -75,14 +64,3 @@ pub trait DebugIO: AddressableIO {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_little_endian() {
-        assert_eq!(0x1234, little_endian(vec![0x34, 0x12]));
-        assert_eq!(0x0011, little_endian(vec![0x11, 0x00]));
-        assert_eq!(0x1100, little_endian(vec![0x00, 0x11]));
-    }
-}

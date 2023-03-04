@@ -5,7 +5,7 @@ pub use super::{INIT_VECTOR_ADDR, INTERRUPT_VECTOR_ADDR};
 pub use crate::addressing_mode::*;
 pub use crate::cpu_instruction::{CPUInstruction, LogLine};
 pub use crate::memory::MemoryStack as Memory;
-pub use crate::memory::{little_endian, AddressableIO, MemoryError};
+pub use crate::memory::{AddressableIO, MemoryError};
 pub use crate::registers::{Registers, STACK_BASE_ADDR};
 
 mod adc;
