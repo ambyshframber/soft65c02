@@ -50,15 +50,6 @@ pub struct AddressingModeResolution {
 }
 
 impl AddressingModeResolution {
-    fn new(
-        addressing_mode: AddressingMode,
-        target_address: Option<usize>,
-    ) -> Self {
-        AddressingModeResolution {
-            addressing_mode, target_address,
-        }
-    }
-
     pub fn operands(&self) -> &[u8] {
         self.addressing_mode.get_operands()
     }
@@ -124,7 +115,7 @@ impl AddressingMode {
             AddressingMode::Accumulator => {
                 self.to_resolution_no_addr()
             }
-            AddressingMode::Immediate(v) => self.to_resolution(opcode_address + 1 as usize),
+            AddressingMode::Immediate(_v) => self.to_resolution(opcode_address + 1 as usize),
             AddressingMode::ZeroPage(v) => self.to_resolution(v[0] as usize),
             AddressingMode::ZeroPageXIndexed(v) => self.to_resolution((v[0] as usize + registers.register_x as usize) % 0x100),
             AddressingMode::ZeroPageYIndexed(v) => self.to_resolution((v[0] as usize + registers.register_y as usize) % 0x100),
@@ -180,7 +171,7 @@ impl AddressingMode {
                 let dst_addr = memory.read_le_u16(u16::from_le_bytes(v) as usize)? as usize;
                 self.to_resolution(dst_addr)
             }
-            AddressingMode::Relative(_addr, v) => {
+            AddressingMode::Relative(_addr, _v) => {
                 self.to_resolution_no_addr()
             },
             AddressingMode::ZeroPageRelative(_addr, v) => {

@@ -21,7 +21,7 @@ use soft65c02::{AddressableIO, LogLine, Memory, MemoryParserIterator, Registers,
 use soft65c02::memory::{MiniFBMemory, MemoryError };
 use soft65c02::source_boolex::*;
 
-use structopt::StructOpt;
+use clap::Parser as ClapParser;
 
 use std::collections::VecDeque;
 use std::fs::File;
@@ -33,20 +33,24 @@ use std::process;
 
 const VERSION: &'static str = "1.0.0-alpha2";
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "soft65C02")]
+#[derive(ClapParser, Debug)]
+#[command(author, version, about, long_about = None)]
 struct CommandLineArguments {
-    // logline buffer is the number of log lines kept after each instruction execution
-    #[structopt(short="l", long, default_value = "35")]
+    /// the number of log lines kept after each instruction execution
+    #[arg(short='l', long, default_value = "35")]
     logline_buffer: usize,
 
-    // do not use history
-    #[structopt(short="s", long)]
+    /// do not use history
+    #[arg(short='s', long)]
     no_history: bool,
 
-    // do not create initial 64K RAM
-    #[structopt(short="r", long)]
+    /// do not create initial 64K RAM
+    #[arg(short='r', long)]
     no_ram: bool,
+
+    /// initialise the emulator with the wren memory map
+    #[arg(short='W', long)]
+    wren: Option<String>,
 }
 
 #[derive(Debug)]
@@ -118,7 +122,7 @@ fn display_error<T: RuleType>(err: PestError<T>) {
 fn main() {
     // 0 global configuration
     let mut token = {
-        let cli_opts = CommandLineArguments::from_args();
+        let cli_opts = CommandLineArguments::parse();
         let interrupted = Arc::new(AtomicBool::new(false));
         let rmtint = interrupted.clone();
         ctrlc::set_handler(move || {
@@ -139,7 +143,7 @@ fn main() {
     // 2 CLI prompt & readline configuration
     println!(
         "{}",
-        Colour::Green.paint(format!("Welcome in Soft-65C02 version {}", VERSION))
+        Colour::Green.paint(format!("Welcome to Soft-65C02 version {}", VERSION))
     );
     let prompt = format!("{}", Colour::Fixed(148).bold().paint(">> "));
     let mut rl = Editor::<CommandLineCompleter>::new();
@@ -292,11 +296,11 @@ fn exec_disassemble_instruction(
         return;
     }
 
-    for (op, line) in MemoryParserIterator::new(addr, &memory).enumerate() {
-        println!("{}", line);
-        if token.ctrlc.load(Ordering::Relaxed) || op >= len {
+    for line in MemoryParserIterator::new(addr, &memory).take(len) {
+        if token.ctrlc.load(Ordering::Relaxed) {
             break;
         }
+        println!("{}", line);
     }
 }
 

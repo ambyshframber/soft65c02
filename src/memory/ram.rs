@@ -2,14 +2,18 @@ use super::*;
 
 /// Basic RAM.
 pub struct RAM {
-    ram: Box<[u8; MEMMAX + 1]>,
+    ram: Vec<u8>,
 }
 
 impl RAM {
     pub fn new() -> RAM {
         RAM {
-            ram: Box::new([0x00; MEMMAX + 1]),
+            ram: vec![0; 65536]
         }
+    }
+
+    pub fn new_with_size(len: usize) -> RAM {
+        RAM { ram: vec![0; len] }
     }
 }
 

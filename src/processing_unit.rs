@@ -363,8 +363,10 @@ pub fn read_step(address: usize, memory: &Memory) -> Result<CPUInstruction, CPUE
 }
 
 pub fn disassemble(start: usize, end: usize, memory: &Memory) -> Result<Vec<CPUInstruction>, CPUError> {
+    assert!(end >= start);
     let mut cp = start;
-    let mut output: Vec<CPUInstruction> = Vec::with_capacity((end - start) * 2);
+    let len = end - start;
+    let mut output: Vec<CPUInstruction> = Vec::with_capacity(len * 2);
     // TODO: more accurate guess
 
     while cp < end {
@@ -385,7 +387,7 @@ impl<'a> MemoryParserIterator<'a> {
     pub fn new(start_address: usize, memory: &'a Memory) -> MemoryParserIterator {
         MemoryParserIterator {
             cp: start_address,
-            memory: memory,
+            memory,
         }
     }
 }
