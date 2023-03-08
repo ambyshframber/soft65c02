@@ -260,7 +260,7 @@ fn exec_run_instruction(
         if loglines.len() > token.cli_opts.logline_buffer {
             loglines.pop_front();
         }
-        if token.ctrlc.load(Ordering::Relaxed)
+        if token.ctrlc.load(Ordering::Relaxed) // bail out if you get ctrl-c'd
             || stop_condition.solve(registers, memory)
             || registers.command_pointer == cp
         {

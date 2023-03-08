@@ -38,6 +38,12 @@ impl AddressableIO for Subsystem {
     fn read_1(&self, addr: usize) -> MemResult<u8> {
         self.subsystem.read_1(addr)
     }
+    fn read_2(&self, addr: usize) -> MemResult<[u8; 2]> {
+        self.subsystem.read_2(addr)
+    }
+    fn read_le_u16(&self, addr: usize) -> MemResult<u16> {
+        self.subsystem.read_le_u16(addr)
+    }
 
     fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {
         self.subsystem.read_n(addr, len)
@@ -141,6 +147,18 @@ impl AddressableIO for MemoryStack {
             .find(|(split, _)| **split >= addr)
             .ok_or(MemoryError::Other(addr, "reading unallocated memory"))?.1;
         self.stack[*sub_idx].read_1(addr)
+    }
+    fn read_2(&self, addr: usize) -> MemResult<[u8; 2]> {
+        let sub_idx = self.address_map.iter()
+            .find(|(split, _)| **split >= addr + 1)
+            .ok_or(MemoryError::Other(addr, "reading unallocated memory, or read_2ing across devices"))?.1;
+        self.stack[*sub_idx].read_2(addr)
+    }
+    fn read_le_u16(&self, addr: usize) -> MemResult<u16> {
+        let sub_idx = self.address_map.iter()
+            .find(|(split, _)| **split >= addr + 1)
+            .ok_or(MemoryError::Other(addr, "reading unallocated memory, or read_le_u16ing across devices"))?.1;
+        self.stack[*sub_idx].read_le_u16(addr)
     }
 
     fn read_n(&self, addr: usize, len: usize) -> Result<Vec<u8>, MemoryError> {

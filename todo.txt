@@ -4,3 +4,5 @@ add interrupts
 add lua subsystem
 add actual reset vector
 add rom loading from disk
+add 6551
+pass through read_2 and read_le_u16 to subsystems in MemoryStack - DONE
