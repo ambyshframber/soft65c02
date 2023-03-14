@@ -14,7 +14,7 @@ pub fn smb(
     let mut bit = 0b00000001;
     (0..(cpu_instruction.opcode >> 4) - 8).for_each(|_| bit = bit << 1);
     let byte = byte | bit;
-    memory.write(addr, &vec![byte])?;
+    memory.write(addr, &[byte])?;
 
     registers.command_pointer += 1 + resolution.operands().len();
 

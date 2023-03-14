@@ -1,5 +1,5 @@
 factor out vec in AddressingModeResolution - DONE
-figure out how the simulator starts up
+figure out how the simulator starts up - DONE
 add interrupts
 add lua subsystem
 add actual reset vector

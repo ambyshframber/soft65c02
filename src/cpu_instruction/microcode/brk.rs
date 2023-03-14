@@ -16,13 +16,8 @@ pub fn brk(
             .addressing_mode
             .solve(registers.command_pointer, memory, registers)?;
 
-    let bytes = usize::to_le_bytes(registers.command_pointer + 2); // 1 extra padding byte
-    registers.stack_push(memory, bytes[1])?;
-    registers.stack_push(memory, bytes[0])?;
-    registers.stack_push(memory, registers.get_status_register())?;
-    registers.command_pointer = memory.read_le_u16(INTERRUPT_VECTOR_ADDR)? as usize;
-    registers.set_i_flag(true);
-    registers.set_d_flag(false);
+    registers.command_pointer += 2; // 1 extra padding byte
+    registers.interrupt(memory, true)?;
 
     Ok(LogLine::new(
         &cpu_instruction,
@@ -44,7 +39,7 @@ mod tests {
         let cpu_instruction =
             CPUInstruction::new(0x1000, 0xca, "BRK", AddressingMode::Implied, brk);
         let (mut memory, mut registers) = get_stuff(0x1000, vec![0x00]);
-        memory.write(0xfffe, &vec![0x00, 0xf0]).unwrap();
+        memory.write(0xfffe, &[0x00, 0xf0]).unwrap();
         registers.stack_pointer = 0xff;
         let log_line = cpu_instruction
             .execute(&mut memory, &mut registers)

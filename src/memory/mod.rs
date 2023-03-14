@@ -7,16 +7,16 @@ mod memory_stack;
 mod minifb_sub;
 mod ram;
 mod rom;
+#[cfg(unix)]
+mod w65c51n;
 
-pub use error::MemoryError;
+pub use error::*;
 pub use memory_stack::MemoryStack;
 pub use minifb_sub::MiniFBMemory;
 pub use ram::RAM;
 pub use rom::ROM;
 
 pub const MEMMAX: usize = 65535;
-
-type MemResult<T> = Result<T, MemoryError>;
 
 /// This trait defines the interface for all memory systems
 pub trait AddressableIO {

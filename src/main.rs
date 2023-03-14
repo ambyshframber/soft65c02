@@ -251,22 +251,24 @@ fn exec_run_instruction(
         };
     }
 
-    let mut cp = registers.command_pointer;
+    let mut old_cp = registers.command_pointer;
     let mut loglines: VecDeque<LogLine> = VecDeque::new();
     let mut i = 0;
     loop {
-        loglines.push_back(soft65c02::execute_step(registers, memory).unwrap());
+        let log = soft65c02::execute_step(registers, memory).unwrap();
+        loglines.push_back(log);
         i += 1;
         if loglines.len() > token.cli_opts.logline_buffer {
             loglines.pop_front();
         }
         if token.ctrlc.load(Ordering::Relaxed) // bail out if you get ctrl-c'd
-            || stop_condition.solve(registers, memory)
-            || registers.command_pointer == cp
+            || stop_condition.solve(registers, memory) // or if stop condition matches
+            || registers.command_pointer == old_cp // or if the cpu is spinning
+            // potentially add a flag for this because you might be spinning waiting for an interrupt
         {
             break;
         }
-        cp = registers.command_pointer;
+        old_cp = registers.command_pointer;
     }
 
     if i > token.cli_opts.logline_buffer {

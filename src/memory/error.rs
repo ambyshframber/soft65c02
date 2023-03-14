@@ -8,6 +8,8 @@ pub enum MemoryError {
     Other(usize, &'static str),        // address, error message
 }
 
+pub type MemResult<T> = std::result::Result<T, MemoryError>;
+
 impl fmt::Display for MemoryError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {

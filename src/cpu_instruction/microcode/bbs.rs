@@ -42,7 +42,7 @@ mod tests {
         let cpu_instruction =
             CPUInstruction::new(0x1000, 0x8f, "BBS0", AddressingMode::ZeroPageRelative(0x1000, [0x0a, 0xfe]), bbs);
         let (mut memory, mut registers) = get_stuff(0x1000, vec![0x8f, 0x0a, 0xfe]);
-        memory.write(0x000a, &vec![0xfe]).unwrap();
+        memory.write(0x000a, &[0xfe]).unwrap();
         let log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();
@@ -55,7 +55,7 @@ mod tests {
         let cpu_instruction =
             CPUInstruction::new(0x1000, 0xff, "BBS7", AddressingMode::ZeroPageRelative(0x1000, [0x0a, 0xfe]), bbs);
         let (mut memory, mut registers) = get_stuff(0x1000, vec![0xff, 0x0a, 0xfe]);
-        memory.write(0x000a, &vec![0x7f]).unwrap();
+        memory.write(0x000a, &[0x7f]).unwrap();
         let log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();
@@ -68,7 +68,7 @@ mod tests {
         let cpu_instruction =
             CPUInstruction::new(0x1000, 0xbf, "BBS3", AddressingMode::ZeroPageRelative(0x1000, [0x0a, 0x09]), bbs);
         let (mut memory, mut registers) = get_stuff(0x1000, vec![0xbf, 0x0a, 0x09]);
-        memory.write(0x000a, &vec![0x08]).unwrap();
+        memory.write(0x000a, &[0x08]).unwrap();
         let _log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();

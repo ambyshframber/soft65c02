@@ -62,7 +62,7 @@ mod tests {
             CPUInstruction::new(0x1000, 0xca, "bit", AddressingMode::ZeroPage([0xa0]), bit);
         let (mut memory, mut registers) = get_stuff(0x1000, vec![0xca, 0xa0, 0x02]);
         registers.accumulator = 0x03;
-        memory.write(0xa0, &vec![0xba]).unwrap();
+        memory.write(0xa0, &[0xba]).unwrap();
         let _log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();
@@ -105,7 +105,7 @@ mod tests {
             CPUInstruction::new(0x1000, 0xca, "bit", AddressingMode::ZeroPage([0xa0]), bit);
         let (mut memory, mut registers) = get_stuff(0x1000, vec![0xca, 0xa0, 0x02]);
         registers.accumulator = 0x03;
-        memory.write(0xa0, &vec![0x4d]).unwrap();
+        memory.write(0xa0, &[0x4d]).unwrap();
         let _log_line = cpu_instruction
             .execute(&mut memory, &mut registers)
             .unwrap();

@@ -18,7 +18,8 @@
 //! http://6502.org/tutorials/interrupts.html).
 
 use super::memory::MemoryStack as Memory;
-use super::memory::{AddressableIO, MemoryError};
+use crate::INTERRUPT_VECTOR_ADDR;
+use super::memory::{AddressableIO, MemoryError, MemResult};
 use std::fmt;
 use rand::random;
 pub const STACK_BASE_ADDR: usize = 0x0100;
@@ -91,7 +92,7 @@ impl Registers {
         &mut self,
         memory: &mut Memory,
         byte: u8,
-    ) -> std::result::Result<(), MemoryError> {
+    ) -> MemResult<()> {
         memory.write(STACK_BASE_ADDR + self.stack_pointer as usize, &vec![byte])?;
         let (sp, _) = self.stack_pointer.overflowing_sub(1);
         self.stack_pointer = sp;
@@ -99,10 +100,28 @@ impl Registers {
         Ok(())
     }
 
-    pub fn stack_pull(&mut self, memory: &Memory) -> std::result::Result<u8, MemoryError> {
+    pub fn stack_pull(&mut self, memory: &Memory) -> MemResult<u8> {
         let (sp, _) = self.stack_pointer.overflowing_add(1);
         self.stack_pointer = sp;
         memory.read_1(STACK_BASE_ADDR + self.stack_pointer as usize)
+    }
+
+    pub fn interrupt(&mut self, memory: &mut Memory, is_brk: bool) -> MemResult<()> {
+        if self.i_flag_is_set() || is_brk { // always interrupt if it's a brk
+            let bytes = self.command_pointer.to_le_bytes();
+            self.stack_push(memory, bytes[1])?;
+            self.stack_push(memory, bytes[0])?;
+            let mut status = self.get_status_register();
+            if !is_brk { // clear B flag if it's a hardware interrupt
+                status &= 0b1110_1111
+            }
+            self.stack_push(memory, status)?;
+            self.command_pointer = memory.read_le_u16(INTERRUPT_VECTOR_ADDR)? as usize;
+            self.set_i_flag(true);
+            self.set_d_flag(false);
+        }
+
+        Ok(())
     }
 
     flag_fns!(n_flag_is_set, set_n_flag, N_SHIFT);

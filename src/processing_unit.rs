@@ -352,7 +352,9 @@ fn resolve_opcode(address: usize, opcode: u8, memory: &Memory) -> Result<CPUInst
 }
 
 pub fn execute_step(registers: &mut Registers, memory: &mut Memory) -> Result<LogLine, CPUError> {
-    memory.update();
+    if memory.update() {
+        registers.interrupt(memory, false)?;
+    }
     let cpu_instruction = read_step(registers.command_pointer, memory)?;
     Ok(cpu_instruction.execute(memory, registers)?)
 }
